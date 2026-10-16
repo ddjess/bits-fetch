@@ -1,0 +1,22 @@
+{
+  "name": "[Bits Fetch] Fetch success rate is low",
+  "type": "query alert",
+  "query": "sum(last_15m):sum:dog.bone.returned{env:sandbox}.as_count() / sum:dog.bone.thrown{env:sandbox}.as_count() * 100 < 70",
+  "message": "{{#is_alert}}Only {{value}}% of thrown bones came back in the last 15 minutes (normal is about 85%). Check the Bits Fetch dashboard and the error traces on thrower-api.{{/is_alert}}\n{{#is_warning}}Bits is getting distracted: fetch success is {{value}}%.{{/is_warning}}\n{{#is_recovery}}Good dog! Fetch success is back to {{value}}%.{{/is_recovery}}",
+  "tags": [
+    "app:bits-fetch",
+    "env:sandbox"
+  ],
+  "priority": 3,
+  "options": {
+    "thresholds": {
+      "critical": 70,
+      "warning": 78
+    },
+    "notify_no_data": false,
+    "require_full_window": false,
+    "include_tags": false,
+    "renotify_interval": 0,
+    "notify_audit": false
+  }
+}

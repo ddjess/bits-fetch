@@ -1,0 +1,665 @@
+{
+  "title": "Bits Fetch",
+  "description": "Logs, metrics, traces and RUM from the Bits Fetch game. https://github.com/ddjess/bits-fetch",
+  "layout_type": "ordered",
+  "reflow_type": "fixed",
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "sandbox"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "type": "note",
+        "content": "## \ud83e\uddb4 Bits Fetch\nEvery throw is one trace across 5 services. **dog.bone.thrown** and **dog.bone.returned** are DogStatsD counts; the gap between them is the failure rate (squirrels, lost bones, crashes).",
+        "background_color": "purple",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Bones thrown",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:dog.bone.thrown{$env}.as_count()",
+                "aggregator": "sum"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Bones returned",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:dog.bone.returned{$env}.as_count()",
+                "aggregator": "sum"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Fetch success rate",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:dog.bone.returned{$env}.as_count()",
+                "aggregator": "sum"
+              },
+              {
+                "data_source": "metrics",
+                "name": "q2",
+                "query": "sum:dog.bone.thrown{$env}.as_count()",
+                "aggregator": "sum"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "100 * q1 / q2"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 80,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": ">=",
+                "value": 70,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 70,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "autoscale": false,
+        "precision": 1,
+        "custom_unit": "%"
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "p95 fetch duration",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "p95:trace.flask.request{$env,service:thrower-api,resource_name:post_/throw}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ]
+          }
+        ],
+        "autoscale": false,
+        "precision": 1,
+        "custom_unit": "s"
+      },
+      "layout": {
+        "x": 10,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Thrown vs returned",
+        "type": "timeseries",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:dog.bone.thrown{$env}.as_count()"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "thrown"
+              }
+            ],
+            "display_type": "bars",
+            "style": {
+              "palette": "purple"
+            }
+          },
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:dog.bone.returned{$env}.as_count()"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "returned"
+              }
+            ],
+            "display_type": "bars",
+            "style": {
+              "palette": "green"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "definition": {
+        "title": "Failed fetches by type (from logs)",
+        "type": "timeseries",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "q1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "search": {
+                  "query": "service:thrower-api status:error \"squirrel\""
+                },
+                "group_by": []
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "squirrel"
+              }
+            ],
+            "display_type": "bars",
+            "style": {
+              "palette": "orange"
+            }
+          },
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "q1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "search": {
+                  "query": "service:thrower-api status:error \"lost\""
+                },
+                "group_by": []
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "bone lost"
+              }
+            ],
+            "display_type": "bars",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "q1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "search": {
+                  "query": "service:thrower-api status:error \"crashed\""
+                },
+                "group_by": []
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "bone-service crash"
+              }
+            ],
+            "display_type": "bars",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 2,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "definition": {
+        "title": "Fetch duration (throw to return)",
+        "type": "timeseries",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "p50:trace.flask.request{$env,service:thrower-api,resource_name:post_/throw}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "p50"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "p95:trace.flask.request{$env,service:thrower-api,resource_name:post_/throw}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "p95"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "purple"
+            }
+          },
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "max:trace.flask.request{$env,service:thrower-api,resource_name:post_/throw}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "max"
+              }
+            ],
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "definition": {
+        "title": "Requests by service",
+        "type": "timeseries",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:trace.flask.request.hits{$env} by {service}.as_count()"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1",
+                "alias": "requests"
+              }
+            ],
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 5,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "definition": {
+        "title": "Service map",
+        "type": "servicemap",
+        "service": "thrower-api",
+        "filters": [
+          "env:sandbox"
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "definition": {
+        "title": "fetch! / good dog! / bad dog...",
+        "type": "list_stream",
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "service:thrower-api (\"fetch!\" OR \"good dog!\" OR \"bad dog\")",
+              "indexes": []
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "service",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "compact"
+              }
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 8,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "definition": {
+        "title": "Jumps (jump-service requests)",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:trace.flask.request.hits{$env,service:jump-service}.as_count()",
+                "aggregator": "sum"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "RUM: throws clicked",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "rum",
+                "name": "q1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "search": {
+                  "query": "@type:action @action.name:throw_bone service:bits-fetch"
+                },
+                "group_by": []
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 3,
+        "y": 12,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "RUM: sessions",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "rum",
+                "name": "q1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "search": {
+                  "query": "@type:session service:bits-fetch"
+                },
+                "group_by": []
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {
+        "x": 6,
+        "y": 12,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "APM errors by service",
+        "type": "toplist",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "q1",
+                "query": "sum:trace.flask.request.errors{$env} by {service}.as_count()",
+                "aggregator": "sum"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "q1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 9,
+        "y": 12,
+        "width": 3,
+        "height": 2
+      }
+    }
+  ]
+}

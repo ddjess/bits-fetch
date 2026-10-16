@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bits Fetch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/config.js"></script>
+  <script>
+    // Datadog Browser RUM (CDN async). Config comes from /config.js, which reads your .env.
+    (function (h, o, u, n, d) {
+      h = h[d] = h[d] || { q: [], onReady: function (c) { h.q.push(c) } };
+      d = o.createElement(u); d.async = 1; d.src = n;
+      n = o.getElementsByTagName(u)[0]; n.parentNode.insertBefore(d, n);
+    })(window, document, "script", "https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js", "DD_RUM");
+    window.DD_RUM.onReady(function () {
+      var c = window.BITS_RUM_CONFIG || {};
+      if (!c.applicationId || !c.clientToken) { console.warn("RUM disabled: set DD_RUM_APPLICATION_ID and DD_RUM_CLIENT_TOKEN in .env"); return; }
+      window.DD_RUM.init({
+        applicationId: c.applicationId,
+        clientToken: c.clientToken,
+        site: c.site,
+        service: c.service,
+        env: c.env,
+        version: c.version,
+        sessionSampleRate: 100,
+        sessionReplaySampleRate: 100,
+        trackUserInteractions: true,
+        trackResources: true,
+        trackLongTasks: true,
+        defaultPrivacyLevel: "allow",
+        // Adds trace headers to /throw so each RUM click links to its backend trace.
+        allowedTracingUrls: [window.location.origin],
+        traceSampleRate: 100,
+      });
+    });
+  </script>
+</head>
+<body>
+  <main>
+    <h1>BITS <span>FETCH</span></h1>
+
+    <div id="stage-wrap">
+      <div id="stage">
+        <div class="sky"></div>
+        <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+        <div class="hill h1"></div><div class="hill h2"></div><div class="hill h3"></div>
+        <div class="ground"></div>
+        <div id="patches"></div>
+        <div id="dots"></div>
+        <div id="hud">
+          <span>BONES <b id="bones">000</b></span>
+          <span>THROWS <b id="throws">000</b></span>
+          <span>STREAK <b id="streak">0</b></span>
+          <span>MISSES <b id="misses">0</b></span>
+        </div>
+        <div id="human" class="sprite"></div>
+        <div id="dog" class="sprite"></div>
+        <div id="bone" class="sprite"></div>
+        <div id="squirrel" class="sprite hidden"></div>
+        <div id="bubble-dog" class="bubble hidden"></div>
+        <div id="bubble-human" class="bubble hidden"></div>
+        <div id="banner" class="hidden"></div>
+      </div>
+    </div>
+
+    <section id="controls">
+      <div id="meter-box">
+        <div id="meter-label"><span>POWER</span><span id="power-pct">0%</span></div>
+        <div id="meter"></div>
+        <div id="meter-zones"><span style="width:40%">SHORT</span><span style="width:35%">MEDIUM</span><span style="width:25%">LONG</span></div>
+      </div>
+      <div id="buttons">
+        <button id="throw-btn" type="button">HOLD TO THROW</button>
+        <button id="auto-btn" type="button" aria-pressed="false">AUTO-FETCH: OFF</button>
+      </div>
+      <p id="status">Hold the button (or the <kbd>SPACE</kbd> bar) to charge, then let go to throw.</p>
+      <p id="auto-help"><b>Auto-Fetch</b> throws the bone for you every few seconds at a random power, so traces, logs and metrics keep flowing to Datadog without clicking. Press it again to stop.</p>
+    </section>
+
+    <section id="feed">
+      <h2>LOG FEED <small>(what's being sent to Datadog)</small></h2>
+      <ol id="log"></ol>
+    </section>
+  </main>
+  <script src="/sprites.js"></script>
+  <script src="/game.js"></script>
+</body>
+</html>

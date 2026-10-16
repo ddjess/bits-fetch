@@ -1,0 +1,99 @@
+name: bits-fetch
+
+x-app: &app
+  build: .
+  image: bits-fetch:latest
+  restart: unless-stopped
+  env_file: .env
+  depends_on: [datadog-agent]
+
+x-dd-env: &dd-env
+  DD_AGENT_HOST: datadog-agent
+  DD_ENV: sandbox
+  DD_VERSION: 1.0.0
+  DD_LOGS_INJECTION: "true"
+  DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED: "true"
+  DD_TRACE_SAMPLING_RULES: '[{"sample_rate":1}]'
+  DOG_NAME: bits
+
+services:
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DD_HOSTNAME: bits-fetch-local
+      DD_ENV: sandbox
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_LOGS_ENABLED: "true"
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
+      DD_CONTAINER_EXCLUDE_LOGS: "name:datadog-agent"
+    volumes:
+      # Colima runs Docker inside a small VM; these paths are inside that VM, which is what we want.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+
+  thrower-api:
+    <<: *app
+    ports: ["8080:5000"]
+    environment:
+      <<: *dd-env
+      APP: thrower_api
+      DD_SERVICE: thrower-api
+    labels:
+      com.datadoghq.tags.service: thrower-api
+      com.datadoghq.tags.env: sandbox
+      com.datadoghq.tags.version: 1.0.0
+      com.datadoghq.ad.logs: '[{"source":"python","service":"thrower-api"}]'
+
+  dog-service:
+    <<: *app
+    environment:
+      <<: *dd-env
+      APP: dog_service
+      DD_SERVICE: dog-service
+    labels:
+      com.datadoghq.tags.service: dog-service
+      com.datadoghq.tags.env: sandbox
+      com.datadoghq.tags.version: 1.0.0
+      com.datadoghq.ad.logs: '[{"source":"python","service":"dog-service"}]'
+
+  jump-service:
+    <<: *app
+    environment:
+      <<: *dd-env
+      APP: jump_service
+      DD_SERVICE: jump-service
+    labels:
+      com.datadoghq.tags.service: jump-service
+      com.datadoghq.tags.env: sandbox
+      com.datadoghq.tags.version: 1.0.0
+      com.datadoghq.ad.logs: '[{"source":"python","service":"jump-service"}]'
+
+  terrain-service:
+    <<: *app
+    environment:
+      <<: *dd-env
+      APP: terrain_service
+      DD_SERVICE: terrain-service
+    labels:
+      com.datadoghq.tags.service: terrain-service
+      com.datadoghq.tags.env: sandbox
+      com.datadoghq.tags.version: 1.0.0
+      com.datadoghq.ad.logs: '[{"source":"python","service":"terrain-service"}]'
+
+  bone-service:
+    <<: *app
+    environment:
+      <<: *dd-env
+      APP: bone_service
+      DD_SERVICE: bone-service
+    labels:
+      com.datadoghq.tags.service: bone-service
+      com.datadoghq.tags.env: sandbox
+      com.datadoghq.tags.version: 1.0.0
+      com.datadoghq.ad.logs: '[{"source":"python","service":"bone-service"}]'

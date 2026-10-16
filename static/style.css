@@ -1,0 +1,100 @@
+:root {
+  --bg: #1d1033;
+  --panel: #2a1850;
+  --ink: #f5f1ff;
+  --muted: #b9a9e0;
+  --purple: #8a3ffc;
+  --purple-dark: #4b1f87;
+  --sky: #6fb7ff;
+  --grass: #3ec24a;
+  --grass-dark: #1f7a2a;
+  --dirt: #b8692e;
+  --dirt-dark: #7a3f17;
+  --font: "Press Start 2P", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+main { max-width: 992px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 28px; letter-spacing: 2px; margin: 8px 0 16px; text-shadow: 3px 3px 0 var(--purple-dark); }
+h1 span { color: var(--purple); }
+h2 { font-size: 12px; margin: 0 0 10px; }
+h2 small { color: var(--muted); font-size: 8px; }
+kbd { font-family: var(--font); background: #000; padding: 2px 5px; border: 2px solid var(--muted); }
+
+/* ---------- stage (fixed 960x420 logical size, scaled to fit) ---------- */
+#stage-wrap { width: 100%; position: relative; border: 4px solid #000; box-shadow: 6px 6px 0 #000; overflow: hidden; }
+#stage { position: absolute; top: 0; left: 0; width: 960px; height: 420px; transform-origin: 0 0; overflow: hidden; user-select: none; touch-action: none; }
+.sky { position: absolute; inset: 0; background: var(--sky); }
+.cloud { position: absolute; width: 96px; height: 32px; background: #fff; box-shadow: 16px -16px 0 #fff, 48px -16px 0 #fff, 32px -32px 0 #fff, 0 0 0 4px #000; animation: drift 9s ease-in-out infinite alternate; }
+.cloud.c1 { top: 70px; left: 120px; }
+.cloud.c2 { top: 120px; left: 520px; animation-duration: 12s; transform: scale(.8); }
+.cloud.c3 { top: 60px; left: 820px; animation-duration: 10s; }
+@keyframes drift { from { translate: -40px 0; } to { translate: 40px 0; } }
+.hill { position: absolute; bottom: 70px; background: #58d26a; border: 4px solid #000; border-bottom: 0; border-radius: 50% 50% 0 0; }
+.hill.h1 { left: 180px; width: 260px; height: 110px; }
+.hill.h2 { left: 560px; width: 180px; height: 70px; background: #4bc55e; }
+.hill.h3 { left: 760px; width: 300px; height: 140px; }
+.ground {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 70px; border-top: 4px solid #000;
+  background:
+    linear-gradient(var(--grass) 0 10px, var(--grass-dark) 10px 14px, transparent 14px),
+    repeating-linear-gradient(90deg, transparent 0 30px, var(--dirt-dark) 30px 32px),
+    repeating-linear-gradient(0deg, var(--dirt) 0 14px, var(--dirt-dark) 14px 16px);
+}
+.patch { position: absolute; bottom: 52px; height: 22px; border: 4px solid #000; }
+.patch.pond { background: repeating-linear-gradient(90deg, #2f7de1 0 12px, #5aa3ff 12px 20px); border-radius: 10px; animation: ripple 1s steps(2) infinite; }
+.patch.mud { background: repeating-linear-gradient(90deg, #5b3415 0 10px, #6e4119 10px 18px); border-radius: 6px; }
+@keyframes ripple { 50% { background-position: 8px 0; } }
+#dots .dot { position: absolute; width: 6px; height: 6px; background: #fff; border: 2px solid #000; }
+
+.sprite { position: absolute; left: 0; top: 0; will-change: transform; }
+.sprite svg { display: block; }
+.hidden { display: none !important; }
+
+#hud { position: absolute; top: 14px; left: 16px; right: 16px; display: flex; gap: 28px; font-size: 12px; color: #fff; text-shadow: 2px 2px 0 #000; }
+#hud b { color: #ffe066; font-weight: normal; }
+
+.bubble { position: absolute; padding: 8px 10px; background: #fff; color: #000; font-size: 11px; border: 4px solid #000; white-space: nowrap; transform: translate(-50%, -100%); }
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -12px; margin-left: -6px; border: 6px solid transparent; border-top-color: #000; }
+.bubble.good { background: #ffe066; }
+.bubble.bad { background: #ff6b6b; color: #fff; }
+#banner { position: absolute; top: 160px; left: 0; right: 0; text-align: center; font-size: 26px; color: #fff; text-shadow: 4px 4px 0 #000; }
+#banner.glitch { animation: glitch .15s steps(2) infinite; color: #ff6b6b; }
+@keyframes glitch { 50% { transform: translateX(6px); opacity: .6; } }
+.flicker { animation: glitch .1s steps(2) infinite; }
+
+/* ---------- controls ---------- */
+#controls { margin-top: 20px; display: grid; grid-template-columns: 1fr auto; gap: 14px 20px; align-items: start; }
+#meter-box { min-width: 0; }
+#meter-label { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 6px; color: var(--muted); }
+#meter { display: flex; gap: 3px; height: 34px; padding: 4px; background: #000; border: 4px solid #000; outline: 2px solid var(--muted); }
+#meter .seg { flex: 1; background: #2b2b3a; }
+#meter.max { animation: pulse .25s steps(2) infinite; }
+@keyframes pulse { 50% { outline-color: #ffe066; } }
+#meter-zones { display: flex; margin-top: 6px; font-size: 8px; color: var(--muted); }
+#meter-zones span { border-left: 2px solid var(--muted); padding-left: 4px; }
+#buttons { display: flex; flex-direction: column; gap: 10px; width: 270px; }
+button { font-family: var(--font); font-size: 12px; padding: 14px 16px; border: 4px solid #000; box-shadow: 4px 4px 0 #000; cursor: pointer; color: #fff; background: var(--purple); touch-action: none; user-select: none; }
+button:active, button.held { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
+button:disabled { background: #555; cursor: not-allowed; }
+#auto-btn { background: #2b2b3a; }
+#auto-btn[aria-pressed="true"] { background: #1f9d55; }
+#status, #auto-help { grid-column: 1 / -1; margin: 0; font-size: 10px; line-height: 1.8; }
+#auto-help { color: var(--muted); }
+
+/* ---------- log feed ---------- */
+#feed { margin-top: 22px; background: #000; border: 4px solid var(--panel); padding: 14px; }
+#log { list-style: none; margin: 0; padding: 0; font-family: ui-monospace, Menlo, monospace; font-size: 12px; max-height: 190px; overflow-y: auto; }
+#log li { padding: 3px 0; border-bottom: 1px solid #1a1a1a; display: flex; gap: 10px; flex-wrap: wrap; }
+#log .t { color: #777; }
+#log .lvl { width: 48px; }
+#log .info { color: #6fdc8c; }
+#log .warn { color: #ffd166; }
+#log .error { color: #ff6b6b; }
+#log .trace { color: var(--muted); }
+
+@media (max-width: 640px) {
+  #controls { grid-template-columns: 1fr; }
+  #buttons { width: auto; }
+  h1 { font-size: 20px; }
+}
