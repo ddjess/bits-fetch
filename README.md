@@ -3,7 +3,13 @@
 A tiny 8-bit fetch game that sends **traces, logs, custom metrics and RUM** to Datadog.
 Hold to charge, let go to throw, and Bits (a good white dog with a purple collar) runs out, jumps over things, and brings the bone back. Usually.
 
+![Bits jumping mid-fetch](docs/screenshots/jump.png)
+
 Each throw is **one distributed trace across five Python services**. The trace starts when the bone leaves your hand and ends when Bits returns it, so trace duration matches what you see on screen.
+
+| Hold to charge | Bringing it back | Good dog! |
+|---|---|---|
+| ![Power meter and aim preview](docs/screenshots/charge.png) | ![Bits carrying the bone home](docs/screenshots/return.png) | ![Good dog speech bubble](docs/screenshots/good-dog.png) |
 
 ```
 Browser (RUM + Session Replay)
