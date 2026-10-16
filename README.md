@@ -61,6 +61,8 @@ Stop everything with `docker compose down`.
 
 ## Import the dashboard and monitor
 
+![Bits Fetch dashboard in Datadog](docs/screenshots/dashboard.png)
+
 - **Dashboard:** *Dashboards → New Dashboard → ⚙ (settings) → Import dashboard JSON*, then paste [`datadog/dashboard.json`](datadog/dashboard.json).
 - **Monitor:** *Monitors → New Monitor → Import from JSON*, then paste [`datadog/monitor.json`](datadog/monitor.json). It alerts when fewer than 70% of thrown bones come back in a 15-minute window (normal is about 85%). Add your own `@notification` handle to the message.
 
